@@ -113,7 +113,7 @@ function (instance) {
      *
      * @param {Array<(function|object)>} objects - One or more sources from
      *     which properties should be copied.
-     * @param {Object} options
+     * @param {Object} [options]
      * @property {Array<string>} [key=['prototype']] - A list of property names
      *     to look up in the source `objects`; sub-properties will be copied
      *     from the first matching source object property (`prototype` by
