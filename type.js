@@ -63,7 +63,7 @@
 
 'use strict';
 
-var id = '';
+var id = 'type';
 var dependencies = ['instance'];
 
 function factory(instance) {
