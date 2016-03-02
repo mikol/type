@@ -111,7 +111,7 @@ function (instance) {
      * Copies properties directly from one or more source `objects` to the
      * prototype of the new type being defined.
      *
-     * @param {Array<(function|object)>} sources - One or more objects from
+     * @param {Array<(function|object)>} objects - One or more sources from
      *     which properties should be copied.
      * @param {Object} options
      * @property {Array<string>} [key=['prototype']] - A list of property names
