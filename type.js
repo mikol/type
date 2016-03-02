@@ -57,15 +57,16 @@
  * @module type
  */
 
-/* jscs:disable maximumLineLength */
-(function (root, factory) { 'use strict'; var deps = [
-  'instance'
-]; if (typeof define === 'function' && define.amd) { define(deps, function () { return factory.apply(root, [].slice.call(arguments)); }); } else if (typeof module === 'object' && module.exports) { for (var x = deps.length; x--;) { deps[x] = require(deps[x]); } module.exports = factory.apply(root, deps); }/* else { TODO: Default? } */}((typeof global === 'object' && global) || (typeof window === 'object' && window) || /* jshint -W040 */this/* jshint +W040 */,
-/* jscs:enable maximumLineLength */
+(function (context) {
+/*jscs:disable validateIndentation*//*jscs:enable validateIndentation*/
+// -----------------------------------------------------------------------------
 
-function (instance) {
-  'use strict';
+'use strict';
 
+var id = '';
+var dependencies = ['instance'];
+
+function factory(instance) {
   /**
    * @constant {Object}
    * @private
@@ -113,14 +114,14 @@ function (instance) {
      *
      * @param {Array<(function|object)>} objects - One or more sources from
      *     which properties should be copied.
-     * @param {Object} [options]
-     * @property {Array<string>} [key=['prototype']] - A list of property names
-     *     to look up in the source `objects`; sub-properties will be copied
-     *     from the first matching source object property (`prototype` by
-     *     default). To copy the top-level properties of each source object, use
-     *     `{key: []}`.
-     * @property {Object} [map] - A hash of alternative property names. A
-     *     matching source object property name will be mapped to the
+     * @param {Object}           [options]
+     * @property {Array<string>} [options.key=['prototype']] - A list of
+     *     property names to look up in the source `objects`; sub-properties
+     *     will be copied from the first matching source object property
+     *     (`prototype` by default). To copy the top-level properties of each
+     *     source object, use `{key: []}`.
+     * @property {Object}        [options.map] - A hash of alternative property
+     *     names. A matching source object property name will be mapped to the
      *     corresponding string when it is assigned to the new type being
      *     defined; for example, `type(X).copies([{a: 1}], {map: {a: 'b'}})`
      *     will assign source object property `a` to `X.prototype` with the
@@ -292,4 +293,20 @@ function (instance) {
   return function type(constructor) {
     return new Type(constructor);
   };
-}));
+}
+
+// -----------------------------------------------------------------------------
+var x = dependencies.length; var o = 'object';
+context = typeof global === o ? global : typeof window === o ? window : context;
+if (typeof define === 'function' && define.amd) {
+  define(dependencies, function () {
+    return factory.apply(context, [].slice.call(arguments));
+  });
+} else if (typeof module === o && module.exports) {
+  for (; x--;) {dependencies[x] = require(dependencies[x]);}
+  module.exports = factory.apply(context, dependencies);
+} else {
+  for (; x--;) {dependencies[x] = context[dependencies[x]];}
+  context[id] = factory.apply(context, dependencies);
+}
+}(this));
