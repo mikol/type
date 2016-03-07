@@ -46,7 +46,7 @@
  * // ES3 Compatibility (Use bracket notation property access or '$' prefix.)
  *
  * module.exports = type(X).$extends(Y).$implements({
- *   uid: {static: 0},
+ *   uid: {$static: 0},
  *   getUid: function () {
  *     return this.uid;
  *   }
@@ -205,9 +205,14 @@ function factory(instance) {
         // each such property exists and it is accessible via the type itself
         // (as opposed to an “instance” property, for which each instantiated
         // object has a separate copy).
-        descriptor = instance.assign({}, descriptor);
-        descriptor.value = descriptor.static;
-        delete descriptor.static;
+        descriptor.value = descriptor['static'];
+        delete descriptor['static'];
+
+        instance.prop(this.identity, name, descriptor);
+      } else if (descriptor.hasOwnProperty('$static')) {
+        // ES3-compatible alias for `static`.
+        descriptor.value = descriptor.$static;
+        delete descriptor.$static;
 
         instance.prop(this.identity, name, descriptor);
       } else {
