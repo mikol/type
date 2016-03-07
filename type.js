@@ -43,9 +43,9 @@
  * ...
  *
  * // -------------------------------------------------------------------------
- * // ES3 Compatibility (Use bracket notation property access.)
+ * // ES3 Compatibility (Use bracket notation property access or '$' prefix.)
  *
- * module.exports = type(X)['extends'](Y)['implements']({
+ * module.exports = type(X).$extends(Y).$implements({
  *   uid: {static: 0},
  *   getUid: function () {
  *     return this.uid;
@@ -250,7 +250,6 @@ function factory(instance) {
      */
     'implements': function (descriptors) {
       if (arguments.length === 1) {
-        var descriptors = arguments[0];
         for (var name in descriptors) {
           this.define(name, descriptors[name]);
         }
@@ -277,6 +276,20 @@ function factory(instance) {
     valueOf: function () {
       return this.identity;
     }
+  });
+
+  instance.props(Type.prototype, {
+    /**
+     * ES3-compatible alias for
+     * `{@link module:type~Type#extends|extends}`.
+     */
+    $extends: Type.prototype['extends'],
+
+    /**
+     * ES3-compatible alias for
+     * `{@link module:type~Type#implements|implements}`.
+     */
+    $implements: Type.prototype['implements']
   });
 
   /**
