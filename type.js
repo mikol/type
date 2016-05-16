@@ -43,10 +43,12 @@
  * ...
  *
  * // -------------------------------------------------------------------------
- * // ES3 Compatibility (Use bracket notation property access or '$' prefix.)
+ * // ES3 Compatibility: Use imperative method names instead of third-person
+ * // present tense (for example, `extend` instead of `extends`) and other
+ * // aliases (for example, `typic` instead of `static`).
  *
- * module.exports = type(X).$extends(Y).$implements({
- *   uid: {$static: 0},
+ * module.exports = type(X).extend(Y).copy(Z).implement({
+ *   uid: {typic: 0},
  *   getUid: function () {
  *     return this.uid;
  *   }
@@ -58,12 +60,10 @@
  */
 
 (function (context) {
-/*jscs:disable validateIndentation*//*jscs:enable validateIndentation*/
 // -----------------------------------------------------------------------------
 
 'use strict';
 
-var id = 'type';
 var dependencies = ['instance'];
 
 function factory(instance) {
@@ -72,6 +72,14 @@ function factory(instance) {
    * @private
    */
   var COPY_DEFAULTS = {key: ['prototype'], map: {}};
+
+  /**
+   * A briefer, more minifiable alias for `Type.prototype`.
+   *
+   * @constant {Object}
+   * @private
+   */
+  var PROTOTYPE = Type.prototype;
 
   /**
    * Creates an object with chainable type definition methods. Use `extends`
@@ -107,7 +115,7 @@ function factory(instance) {
     });
   }
 
-  instance.props(Type.prototype, {
+  instance.props(PROTOTYPE, {
     /**
      * Copies properties directly from one or more source `objects` to the
      * prototype of the new type being defined.
@@ -190,37 +198,6 @@ function factory(instance) {
     },
 
     /**
-     * Defines a single property (name-value pair) of the new type.
-     *
-     * @param {string} name - The name of the property being defined.
-     * @param {(Object|*)} descriptor - The value (possibly annotated) of the
-     *     property being defined. Properties are read-only, non-enumerable, and
-     *     non-configurable by default.
-     *
-     * @private
-     */
-    define: function (name, descriptor) {
-      if (descriptor.hasOwnProperty('static')) {
-        // Specifies a “static” property of the new type; only a single copy of
-        // each such property exists and it is accessible via the type itself
-        // (as opposed to an “instance” property, for which each instantiated
-        // object has a separate copy).
-        descriptor.value = descriptor['static'];
-        delete descriptor['static'];
-
-        instance.prop(this.identity, name, descriptor);
-      } else if (descriptor.hasOwnProperty('$static')) {
-        // ES3-compatible alias for `static`.
-        descriptor.value = descriptor.$static;
-        delete descriptor.$static;
-
-        instance.prop(this.identity, name, descriptor);
-      } else {
-        instance.prop(this.identity.prototype, name, descriptor);
-      }
-    },
-
-    /**
      * Defines static and instance properties for the new type. Properties are
      * read-only, non-enumerable, and non-configurable unless otherwise
      * specified by a descriptor object.
@@ -256,10 +233,10 @@ function factory(instance) {
     'implements': function (descriptors) {
       if (arguments.length === 1) {
         for (var name in descriptors) {
-          this.define(name, descriptors[name]);
+          describe(this, name, descriptors[name]);
         }
       } else {
-        this.define(arguments[0], arguments[1]);
+        describe(this, arguments[0], arguments[1]);
       }
 
       return this;
@@ -283,19 +260,58 @@ function factory(instance) {
     }
   });
 
-  instance.props(Type.prototype, {
+  instance.props(PROTOTYPE, {
     /**
-     * ES3-compatible alias for
-     * `{@link module:type~Type#extends|extends}`.
+     * Aliases for `{@link module:type~Type#copies|copies}` (for consistency
+     * with other ES3-compatible aliases).
      */
-    $extends: Type.prototype['extends'],
+    copy: PROTOTYPE.copies,
+    $copies: PROTOTYPE.copies,
 
     /**
-     * ES3-compatible alias for
+     * ES3-compatible aliases for `{@link module:type~Type#extends|extends}`.
+     */
+    extend: PROTOTYPE['extends'],
+    $extends: PROTOTYPE['extends'],
+
+    /**
+     * ES3-compatible aliases for
      * `{@link module:type~Type#implements|implements}`.
      */
-    $implements: Type.prototype['implements']
+    implement: PROTOTYPE['implements'],
+    $implements: PROTOTYPE['implements']
   });
+
+  /**
+   * Defines a single property (name-value pair) of a new type.
+   *
+   * @param {Type} type - The type being defined.
+   * @param {string} name - The name of the property to define.
+   * @param {(Object|*)} descriptor - The value (possibly annotated) of the
+   *     property being defined. Properties are read-only, non-enumerable, and
+   *     non-configurable by default.
+   *
+   * @private
+   */
+  function describe(type, name, descriptor) {
+    var keywords = ['$static', 'typic', 'static'];
+    var target = type.identity.prototype;
+
+    for (var i = keywords.length, keyword; i-- && (keyword = keywords[i]);) {
+      if (descriptor.hasOwnProperty(keyword)) {
+        // Specifies a “static” property of the new type; only a single copy
+        // of each such property exists and it is accessible via the type
+        // itself (as opposed to an “instance” property, for which each
+        // instantiated object has a separate copy).
+        target = type.identity;
+        descriptor.value = descriptor[keyword];
+        delete descriptor[keyword];
+        break;
+      }
+    }
+
+    instance.prop(target, name, descriptor);
+  }
 
   /**
    * Creates an object with chainable type definition methods. Use `extends`
@@ -314,17 +330,18 @@ function factory(instance) {
 }
 
 // -----------------------------------------------------------------------------
-var x = dependencies.length; var o = 'object';
+var n = dependencies.length;
+var o = 'object';
 context = typeof global === o ? global : typeof window === o ? window : context;
 if (typeof define === 'function' && define.amd) {
   define(dependencies, function () {
     return factory.apply(context, [].slice.call(arguments));
   });
 } else if (typeof module === o && module.exports) {
-  for (; x--;) {dependencies[x] = require(dependencies[x]);}
+  for (; n--;) { dependencies[n] = require(dependencies[n]); }
   module.exports = factory.apply(context, dependencies);
 } else {
-  for (; x--;) {dependencies[x] = context[dependencies[x]];}
-  context[id] = factory.apply(context, dependencies);
+  for (; n--;) { dependencies[n] = context[dependencies[n]]; }
+  context.type = factory.apply(context, dependencies);
 }
 }(this));
